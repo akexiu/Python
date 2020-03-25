@@ -27,9 +27,18 @@
 # 将文件路径名称分成头和尾一对，生成二元元组。（文件目录，文件名）
 
 
+##修改 为进程操作
+
 import socket
 import os
 import re
+import multiprocessing
+import gevent
+from gevent import monkey
+import threading
+
+# 不是协程操作需要注释
+monkey.patch_all()
 
 
 def main():
@@ -42,8 +51,18 @@ def main():
     # 等待客户端响应
     while True:
         new_socket, client_addr = tcp_service_socket.accept()
-        client_service(new_socket)
-        # 关闭套接字
+        # 1,进程操作
+        # p = multiprocessing.Process(target=client_service,args=(new_socket,))
+        # p.start()
+        # new_socket.close()
+        # 2,协程操作
+        gevent.spawn(client_service, new_socket)
+        # 3，线程操作
+        # p = threading.Thread(client_service,new_socket)
+        # p.start()
+    # client_service(new_socket)
+
+    # 关闭套接字
     tcp_service_socket.close()
 
 
